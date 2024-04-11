@@ -33,14 +33,24 @@ function compare(dateA, dateB) {
 }
 
 
-function SortUp(pointA, pointB) {
+function SortDate(pointA, pointB) {
   const weight = compare(pointA.dateFrom, pointB.dateFrom);
   return weight ?? dayjs(pointA.dateFrom).diff(dayjs(pointB.dateFrom));
 }
 
-function SortDown(pointA, pointB) {
+function SortDateDown(pointA, pointB) {
   const weight = compare(pointA.dateFrom, pointB.dateFrom);
   return weight ?? dayjs(pointB.dateFrom).diff(dayjs(pointA.dateFrom));
 }
 
-export { formatTimePoint, formatDatePoint, formatDateForm, SortUp, SortDown}
+function SortPriceUp(pointA, pointB) {
+  const weight = compare(pointA.basePrice, pointB.basePrice);
+  return weight ?? (pointA.basePrice - pointB.basePrice);
+}
+
+function SortPriceDown(pointA, pointB) {
+  const weight = compare(pointA.basePrice, pointB.basePrice);
+  return weight ?? (pointB.basePrice - pointA.basePrice);
+}
+
+export { formatTimePoint, formatDatePoint, formatDateForm, SortDate, SortPriceUp, SortPriceDown, SortDateDown}

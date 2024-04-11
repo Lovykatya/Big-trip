@@ -1,27 +1,24 @@
 import { render, replace, remove } from '../framework/render.js';
 import NewPointView from '../view/new-point.js';
 import PointView from '../view/point-view.js';
-// import FilterView from '../view/filter.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
   EDITING:'EDITING'
 }
 export default class PointPresenter {
-  // #filters = null;
-  // #filterComponent = new FilterView ({ filters: this.#pointModel});
   #pointComponent = null;
   #pointEditComponent = null;
   #PointEditContainer = null;
   #point;
   #handleModeChange = null;
+  #handleDataChange  = null;
   #mode = Mode.DEFAULT;
 
-  constructor({PointEditContainer, onModeChange}) {
+  constructor({PointEditContainer, onModeChange, onDataChange}) {
     this.#PointEditContainer = PointEditContainer;
     this.#handleModeChange = onModeChange;
-    // this.#handlePointChange = onDataChange;
-    // this.#filters = filters;
+    this.#handleDataChange = onDataChange;
   }
 
   init(point) {
@@ -39,7 +36,8 @@ export default class PointPresenter {
 
     this.#pointEditComponent = new NewPointView({
       point: this.#point,
-      onFormSubmit: this.#handleFormSubmit
+      onFormSubmit: this.#handleFormSubmit,
+      onFormDelete: this.#handleFormDelete
     });
 
     if (prevPointComponent === null || prevPointEditComponent === null) {
@@ -55,8 +53,6 @@ export default class PointPresenter {
       replace(this.#pointEditComponent, prevPointEditComponent)
     }
 
-
-
     remove(prevPointComponent);
     remove(prevPointEditComponent);
   }
@@ -68,6 +64,7 @@ export default class PointPresenter {
 
   resetView () {
     if (this.#mode !== Mode.DEFAULT) {
+      this.#pointEditComponent.reset(this.#point);
       this.#replaceFormToCard()
     }
   }
@@ -86,52 +83,23 @@ export default class PointPresenter {
   #escKeyDownHandler = (evt) =>{
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
+      this.#pointEditComponent.reset(this.#point);
       this.#replaceFormToCard();
-      document.removeEventListener('keydown', escKeyDownHandler);
+      document.removeEventListener('keydown', this.#escKeyDownHandler);
     }
   }
 
-  #handleFormSubmit = () => {
+  #handleFormSubmit = (point) => {
+    this.#handleDataChange(point);
+    document.removeEventListener('keydown', this.#escKeyDownHandler);
     this.#replaceFormToCard();
+  }
+
+  #handleFormDelete = (point) => {
+    this.#pointEditComponent.reset(this.#point);
   }
 }
 
 
 
-
-  // #filterView () {
-
-  //   const pointComponent = new PointView({
-  //     point,
-  //     onEditClick: () => {
-  //       replaceCardToForm.call(this);
-  //       document.addEventListener('keydown', escKeyDownHandler);
-  //     }
-
-  //     const filterComponent = new FilterView({
-  //       filters: this.#pointModel.point,
-  //       acceptFilterClick: () => {
-  //         render(this.#filterView, this.#tripComponents.element, RenderPosition.AFTERBEGIN)
-  //       }
-  //   })
-
-  //   const currentFilterType = 'EVERYTHING';
-  //    this.#filterComponent = new FilterView ({
-  //     filters: generateFilter(this.#boardPoint),
-  //     currentFilterType: currentFilterType,
-  //     acceptFilterClick: acceptFilterClick
-  //     acceptFilterClick: () => {
-  //       replaceCard.call(this);
-  //       render(this.#filterComponent, this.#tripComponents.element, RenderPosition.AFTERBEGIN)
-  //     }
-  //   })
-
-  //   const replaceCard = () => {
-  //     render(this.#filterComponent, this.#tripComponents.element)
-  //   }
-  // }
-
-
-
-  //   this.#filterView();
 

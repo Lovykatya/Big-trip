@@ -1,13 +1,13 @@
 import AbstractView from '../framework/view/abstract-view.js';
 import {SortType} from '../const.js';
 
-function createSortTemplate(SortType) {
+function createSortTemplate() {
   const {DEFAULT, PRICE} = SortType;
   return (
     `<form class="trip-events__trip-sort  trip-sort" action="#" method="get">
       <div class="trip-sort__item  trip-sort__item--day">
-        <input id="sort-day" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-day" checked data-sort-type="${DEFAULT}">
-        <label class="trip-sort__btn" for="sort-day">Day</label>
+        <input id="sort-day" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-day" checked>
+        <label class="trip-sort__btn" for="sort-day" data-sort-type="${DEFAULT}">Day</label>
       </div>
 
       <div class="trip-sort__item  trip-sort__item--event">
@@ -21,8 +21,8 @@ function createSortTemplate(SortType) {
       </div>
 
       <div class="trip-sort__item  trip-sort__item--price">
-        <input id="sort-price" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-price" data-sort-type="${PRICE}">
-        <label class="trip-sort__btn" for="sort-price">Price</label>
+        <input id="sort-price" class="trip-sort__input  visually-hidden" type="radio" name="trip-sort" value="sort-price">
+        <label class="trip-sort__btn" for="sort-price" data-sort-type="${PRICE}">Price</label>
       </div>
 
       <div class="trip-sort__item  trip-sort__item--offer">
@@ -35,22 +35,22 @@ function createSortTemplate(SortType) {
 
 export default class SortView extends AbstractView {
   #handleSortTypeChange = null;
-  #SortType = null;
+  // #SortType = null;
 
   constructor ({onSortTypeChange}){
     super();
     this.#handleSortTypeChange = onSortTypeChange;
-    this.element.addEventListener('change', this.#SortTypeChangeHandler)
+    this.element.addEventListener('click', this.#SortTypeChangeHandler)
   }
 
   get template() {
-    return createSortTemplate(this.#SortType);
+    return createSortTemplate();
   }
 
   #SortTypeChangeHandler = (evt) => {
-    if(evt.target.tagName !== 'LABEL') {
-      return
-    }
+    // if(evt.target.tagName !== 'LABEL') {
+    //   return
+    // }
 
     evt.preventDefault();
     this.#handleSortTypeChange(evt.target.dataset.sortType)

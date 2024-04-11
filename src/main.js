@@ -1,5 +1,5 @@
 import FilterView from './view/filter.js';
-import SortView from './view/sort.js';
+// import SortView from './view/sort.js';
 import { render } from './framework/render.js';
 import TripPresenter from './presenter/trip-presenter.js';
 import PointModel from './model/point-model.js';
@@ -15,7 +15,7 @@ const tripPresenter = new TripPresenter({tripContainer: siteTripEvents, pointMod
 const filters = generateFilter(pointModel.point);
 // debugger;
 
-render(new SortView, siteTripEvents);
+// render(new SortView({onSortTypeChange: currentFilterType}), siteTripEvents);
 render(new FilterView({filters}), siteFiltersElement)
 
 tripPresenter.init();
