@@ -1,32 +1,31 @@
+import he from 'he';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
 import {formatDateForm} from '../utils/tasks.js';
-import { alltypes, offersByType, findDestination } from '../mock/point.js';
+import { offersByType, findDestination } from '../mock/point.js';
 import flatpickr from 'flatpickr';
-
 import 'flatpickr/dist/flatpickr.min.css';
 
+let alltypes = ['taxi', 'ship', 'drive']; 
 
 const defaultPoint = {
   basePrice: 1100,
   dateFrom: "2019-07-10T22:55:56.845Z",
   dateTo: "2019-07-11T11:22:13.375Z",
-  destination:  [
-    {
-      id: -1,
-      description: 'Moscow parliament building',
-      city: 'Moscow',
-      pictures: [
-        {
-          src: 'https://loremflickr.com/248/152?random=1',
-          altDescription: 'Moscow parliament building'
-        },
-        {
-          src: 'https://loremflickr.com/248/152?random=2',
-          altDescription: 'Moscow parliament building'
-        }
-      ]
-    }
-  ],
+  destination: {
+    id: -1,
+    description: 'Moscow parliament building',
+    city: 'Moscow',
+    pictures: [
+      {
+        src: 'https://loremflickr.com/248/152?random=1',
+        altDescription: 'Moscow parliament building'
+      },
+      {
+        src: 'https://loremflickr.com/248/152?random=2',
+        altDescription: 'Moscow parliament building'
+      }
+    ]
+  },
   id: 0,
   offers: [
     {
@@ -41,7 +40,8 @@ const defaultPoint = {
     }
   ],
   type: 'taxi'
-}
+};
+
 
 function createTypeTemplate(alltypes, currentType) {
   return (
@@ -57,7 +57,7 @@ function createTypeTemplate(alltypes, currentType) {
   );
 }
 
-function createOffersTemplate (offers) {
+function createOffersTemplate(offers) {
   if (!offers || !Array.isArray(offers)) {
     return ''; // Возвращаем пустую строку, если offers не определен или не является массивом
   }
@@ -67,19 +67,19 @@ function createOffersTemplate (offers) {
       <section class="event__section  event__section--offers">
         <h3 class="event__section-title  event__section-title--offers">Offers</h3>
         <div class="event__available-offers">
-          <div class="event__offer-selector">
-            ${offers.map(({id, title, price}) =>
-              `<input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}" type="checkbox" name="event-offer-${id}" checked>
+          ${offers.map(({ id, title, price, isChecked }) =>
+            `<div class="event__offer-selector">
+              <input class="event__offer-checkbox  visually-hidden" id="event-offer-${id}" type="checkbox" name="event-offer-${id}" ${isChecked ? 'checked' : ''}>
               <label class="event__offer-label" for="event-offer-${id}">
                 <span class="event__offer-title">${title}</span>
                 &plus;&euro;&nbsp;
                 <span class="event__offer-price">${price}</span>
-              </label>`).join('')}
-          </div>
+              </label>
+            </div>`).join('')}
         </div>
       </section>
     </section>`
-  )
+  );
 }
 
 function createPictureTemplate(pictures) {
@@ -97,11 +97,10 @@ function createPictureTemplate(pictures) {
   );
 }
 
-function createNewPointTemplate(point=defaultPoint) {
-  const {basePrice, dateFrom, dateTo, destination, offers} = point;
+function createNewPointTemplate(point = defaultPoint) {
+  const { basePrice, dateFrom, dateTo, destination, offers } = point;
   const offersTemplate = createOffersTemplate(offers);
-  const createDestinationPicture = destination.pictures;
-  const destinationPicture = createPictureTemplate(createDestinationPicture);
+  const destinationPicture = createPictureTemplate(destination.pictures);
   const typeTemplate = createTypeTemplate(alltypes, point.type);
 
   return (
@@ -109,21 +108,19 @@ function createNewPointTemplate(point=defaultPoint) {
       <form class="event event--edit" action="#" method="post">
         <header class="event__header">
           <div class="event__type-wrapper">
-            <label class="event__type  event__ type-btn" for="event-type-toggle-1">
+            <label class="event__type  event__type-btn" for="event-type-toggle-1">
               <span class="visually-hidden">Choose event type</span>
               <img class="event__type-icon" width="17" height="17" src="img/icons/${point.type}.png" alt="Event type icon">
             </label>
             <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
-
             ${typeTemplate}
-
           </div>
 
           <div class="event__field-group  event__field-group--destination">
             <label class="event__label  event__type-output" for="event-destination-1">
-            ${point.type}
+              ${point.type}
             </label>
-            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${destination.city}" list="destination-list-1">
+            <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${he.encode(destination.city)}" list="destination-list-1">
             <datalist id="destination-list-1">
               <option value="Amsterdam"></option>
               <option value="Geneva"></option>
@@ -144,7 +141,7 @@ function createNewPointTemplate(point=defaultPoint) {
               <span class="visually-hidden">Price</span>
               &euro;
             </label>
-            <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${basePrice}">
+            <input class="event__input  event__input--price" id="event-price-1" type="number" min="0" name="event-price" value="${basePrice}">
           </div>
 
           <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
@@ -154,20 +151,20 @@ function createNewPointTemplate(point=defaultPoint) {
           </button>
         </header>
 
-          ${offersTemplate}
+        ${offersTemplate}
 
-          <section class="event__section  event__section--destination">
-            <h3 class="event__section-title  event__section-title--destination">Destination</h3>
-            <p class="event__destination-description">${destination.description}</p>
+        <section class="event__section  event__section--destination">
+          <h3 class="event__section-title  event__section-title--destination">Destination</h3>
+          <p class="event__destination-description">${destination.description}</p>
 
-            ${destinationPicture}
+          ${destinationPicture}
 
-          </section>
         </section>
       </form>
     </li>`
   );
 }
+
 
 export default class NewPointView extends AbstractStatefulView {
   #handleFormSubmit = null;
@@ -194,17 +191,27 @@ export default class NewPointView extends AbstractStatefulView {
     this.element.querySelector('.event__type-list').addEventListener('change', this.HandlerTypeChange);
     this.element.querySelector('.event__input--destination').addEventListener('change', this.HandlerDestionationChange);
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formDeleteHandler);
+    this.element.querySelector('.event__input--price').addEventListener('change', this.#HandlerPriceChange);
     this.#setDatePickr()
   }
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit(this._state);
+    const formData = new FormData(evt.target);
+    const offers = this._state.offers.map(offer => ({
+      ...offer,
+      isChecked: formData.has(`event-offer-${offer.id}`)
+    }));
+
+    this.updateElement({ offers });
+
+    this.#handleFormSubmit(NewPointView.parseStateToPoint(this._state));
   }
+
 
   #formDeleteHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormDelete(this._state);
+    this.#handleFormDelete(NewPointView.parseStateToPoint(this._state));
   }
 
   removeElement() {
@@ -225,8 +232,9 @@ export default class NewPointView extends AbstractStatefulView {
     return {...point}
   }
 
-  static parseStateToPoint (state) {
-    const point = {...state};
+  static parseStateToPoint(state) {
+    const point = { ...state };
+    point.offers = state.offers.filter(offer => offer.isChecked); // Сохраняем только выбранные offers
     return point;
   }
 
@@ -254,12 +262,25 @@ export default class NewPointView extends AbstractStatefulView {
   HandlerDestionationChange = (evt) => {
     evt.preventDefault();
     const selectedCity = evt.target.value;
-    const newDestination = findDestination({ ...this._state, city: selectedCity });
-    this.updateElement({
-      city: selectedCity,
-      destination: newDestination
-    });
+    const newDestination = findDestination({ city: selectedCity });
+
+    if (newDestination) {
+      this.updateElement({
+        destination: newDestination
+      });
+    } else {
+      console.error(`Destination for city "${selectedCity}" not found.`);
+    }
   };
+
+  #HandlerPriceChange = (evt) => {
+    evt.preventDefault();
+    const price = evt.target.value;
+
+    this.updateElement({
+      basePrice: price
+    })
+  }
 
   reset(point) {
     this.updateElement(

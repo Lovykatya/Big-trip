@@ -1,6 +1,7 @@
 import { render, replace, remove } from '../framework/render.js';
 import NewPointView from '../view/new-point.js';
 import PointView from '../view/point-view.js';
+import {UserAction, UpdateType} from '../const.js';
 
 const Mode = {
   DEFAULT: 'DEFAULT',
@@ -59,7 +60,8 @@ export default class PointPresenter {
 
   destroy() {
     remove (this.#pointComponent);
-    remove(this.#pointEditComponent)
+    remove(this.#pointEditComponent);
+    this.#mode = Mode.DEFAULT;
   }
 
   resetView () {
@@ -90,13 +92,24 @@ export default class PointPresenter {
   }
 
   #handleFormSubmit = (point) => {
-    this.#handleDataChange(point);
+    this.#handleDataChange(
+      UserAction.UPDATE_POINT,
+      UpdateType.MINOR,
+      point
+    );
     document.removeEventListener('keydown', this.#escKeyDownHandler);
     this.#replaceFormToCard();
   }
 
   #handleFormDelete = (point) => {
-    this.#pointEditComponent.reset(this.#point);
+    this.#handleDataChange(
+      UserAction.DELETE_POINT,
+      UpdateType.MINOR,
+      point
+    );
+    // document.removeEventListener('keydown', this.#escKeyDownHandler);
+    // this.#replaceFormToCard();
+    // this.#pointEditComponent.reset(this.#point);
   }
 }
 

@@ -1,52 +1,66 @@
-// import FilterView from '../view/filter.js';
+import { filterType } from '../utils/filter-util.js';
+import FilterView from '../view/filter.js';
+import {remove, render, replace} from '../framework/render.js';
+import { UpdateType } from '../const.js';
 
 
-// export default class FilterPresenter {
-//   #tripComponents = new PointsListView();
-//   #pointModel = null;
-//   #boardPoint = [];
-//   #filters = null;
-//   #filterComponent = new FilterView ({ filters: this.#pointModel});
+export default class FilterPresenter {
+  #filterContainer = null;
+  #filterModel = null;
+  #pointModel = null;
 
-//   constructor({}) {
-// }
-//   init() {
+  #filterComponent = null;
 
-//   }
+  constructor({filterContainer, filterModel, pointModel}) {
+    this.#filterContainer = filterContainer;
+    this.#filterModel = filterModel;
+    this.#pointModel = pointModel;
 
-//   #filterView () {
+    this.#pointModel.addObserver(this.#handleModelEvent);
+    this.#filterModel.addObserver(this.#handleModelEvent);
+  }
 
-//     const pointComponent = new PointView({
-//       point,
-//       onEditClick: () => {
-//         replaceCardToForm.call(this);
-//         document.addEventListener('keydown', escKeyDownHandler);
-//       }
+  get filters() {
+    return [
+      {
+       type: filterType.EVERYTHING,
+       name: 'EVERYTHING'
+      },
+      {
+        type: filterType.FUTURE,
+        name: 'FUTURE'
+      }
+    ];
+  }
 
-//       const filterComponent = new FilterView({
-//         filters: this.#pointModel.point,
-//         acceptFilterClick: () => {
-//           render(this.#filterView, this.#tripComponents.element, RenderPosition.AFTERBEGIN)
-//         }
-//     })
+  init () {
+    const filters = this.filters;
+    const prevFilterComponent = this.#filterComponent;
 
-//     const currentFilterType = 'EVERYTHING';
-//      this.#filterComponent = new FilterView ({
-//       filters: generateFilter(this.#boardPoint),
-//       currentFilterType: currentFilterType,
-//       acceptFilterClick: acceptFilterClick
-//       acceptFilterClick: () => {
-//         replaceCard.call(this);
-//         render(this.#filterComponent, this.#tripComponents.element, RenderPosition.AFTERBEGIN)
-//       }
-//     })
+    this.#filterComponent = new FilterView ({
+      filters,
+      currentFilterType: this.#filterModel.filter,
+      onFilterTypeChange: this.#handleFilterTypeChange
+    })
 
-//     const replaceCard = () => {
-//       render(this.#filterComponent, this.#tripComponents.element)
-//     }
-//   })
+    if (prevFilterComponent === null) {
+      render(this.#filterComponent, this.#filterContainer);
+      return;
+    }
 
-//   this.#filterView();
-// }
+    replace(this.#filterComponent, prevFilterComponent);
+    remove(prevFilterComponent);
+  }
 
-// }
+  #handleModelEvent = () => {
+    this.init();
+  };
+
+  #handleFilterTypeChange = (filterType) => {
+    if (this.#filterModel.filter === filterType) {
+      return;
+    }
+
+    this.#filterModel.setFilter(UpdateType.MAJOR, filterType);
+  };
+}
