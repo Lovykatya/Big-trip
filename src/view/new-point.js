@@ -5,7 +5,7 @@ import { offersByType, findDestination } from '../mock/point.js';
 import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
-let alltypes = ['taxi', 'ship', 'drive']; 
+let alltypes = ['taxi', 'ship', 'drive'];
 
 const defaultPoint = {
   basePrice: 1100,
@@ -98,7 +98,7 @@ function createPictureTemplate(pictures) {
 }
 
 function createNewPointTemplate(point = defaultPoint) {
-  const { basePrice, dateFrom, dateTo, destination, offers } = point;
+  const { basePrice, dateFrom, dateTo, destination, offers, isDisabled, isSaving, isDeleting } = point;
   const offersTemplate = createOffersTemplate(offers);
   const destinationPicture = createPictureTemplate(destination.pictures);
   const typeTemplate = createTypeTemplate(alltypes, point.type);
@@ -144,8 +144,8 @@ function createNewPointTemplate(point = defaultPoint) {
             <input class="event__input  event__input--price" id="event-price-1" type="number" min="0" name="event-price" value="${basePrice}">
           </div>
 
-          <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-          <button class="event__reset-btn" type="reset">Delete</button>
+          <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
+          <button class="event__reset-btn" type="reset">${isDeleting ? 'Deleting': 'Delete'}</button>
           <button class="event__rollup-btn" type="button">
             <span class="visually-hidden">Open event</span>
           </button>
@@ -189,7 +189,7 @@ export default class NewPointView extends AbstractStatefulView {
     this.element.querySelector('form').addEventListener('submit', this.#formSubmitHandler);
     this.element.querySelector('.event__rollup-btn').addEventListener('click', this.#formSubmitHandler);
     this.element.querySelector('.event__type-list').addEventListener('change', this.HandlerTypeChange);
-    this.element.querySelector('.event__input--destination').addEventListener('change', this.HandlerDestionationChange);
+    this.element.querySelector('.event__input--destination').addEventListener('change', this.HandlerDestinationChange);
     this.element.querySelector('.event__reset-btn').addEventListener('click', this.#formDeleteHandler);
     this.element.querySelector('.event__input--price').addEventListener('change', this.#HandlerPriceChange);
     this.#setDatePickr()
@@ -229,12 +229,20 @@ export default class NewPointView extends AbstractStatefulView {
   }
 
   static parsePointToState (point) {
-    return {...point}
+    return {
+      ...point,
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false
+    }
   }
 
   static parseStateToPoint(state) {
     const point = { ...state };
     point.offers = state.offers.filter(offer => offer.isChecked); // Сохраняем только выбранные offers
+    delete point.isDisabled;
+    delete point.isSaving;
+    delete point.isDeleting;
     return point;
   }
 
@@ -259,7 +267,7 @@ export default class NewPointView extends AbstractStatefulView {
     });
   }
 
-  HandlerDestionationChange = (evt) => {
+  HandlerDestinationChange = (evt) => {
     evt.preventDefault();
     const selectedCity = evt.target.value;
     const newDestination = findDestination({ city: selectedCity });
@@ -305,7 +313,7 @@ export default class NewPointView extends AbstractStatefulView {
       this.element.querySelector('#event-start-time-1'),
       {
         dateFormat:'j/n/y H:i',
-        dafaultDate: this._state.dateFrom,
+        defaultDate: this._state.dateFrom,
         onClose: this.#dateFromChangeHandler,
         enableTime: true,
         time_24hr: true,

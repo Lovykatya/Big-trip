@@ -50,6 +50,24 @@ export default class NewPointPresenter {
     }
   }
 
+  setSaving() {
+    this.#pointEditComponent.updateElement({
+      isSaving: true,
+      isDisabled: true
+    })
+  }
+
+  setAborting() {
+    const resetFormState = () => {
+      this.#pointEditComponent.updateElement({
+      isSaving: false,
+      isDisabled: false,
+      isDeleting: false
+      })
+      this.#pointEditComponent.shake(resetFormState)
+    }
+  }
+
   #handleFormSubmit = (point) => {
     this.#handleDataChange(
       UserAction.ADD_POINT,
@@ -58,10 +76,9 @@ export default class NewPointPresenter {
       point
     );
     document.removeEventListener('keydown', this.#escKeyDownHandler);
-    this.destroy
   }
 
   #handleFormDelete = () => {
-    this.destroy
+    this.destroy()
   }
 }

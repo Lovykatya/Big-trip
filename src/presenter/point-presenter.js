@@ -91,6 +91,40 @@ export default class PointPresenter {
     }
   }
 
+  setSaving() {
+    if (this.#mode === Mode.EDITING) {
+      this.#pointEditComponent.updateElement({
+        isSaving: true,
+        isDisabled: true
+      })
+    }
+  }
+
+  setDeleting() {
+    if (this.#mode === Mode.EDITING) {
+      this.#pointEditComponent.updateElement({
+        isDeleting: true,
+        isSaving: true
+      })
+    }
+  }
+
+  setAborting() {
+    if (this.#mode === Mode.DEFAULT) {
+      this.#pointComponent.shake()
+    }
+
+    const resetFormState = () => {
+      this.#pointEditComponent.updateElement({
+      isSaving: false,
+      isDisabled: false,
+      isDeleting: false
+      })
+    }
+    
+    this.#pointEditComponent.shake(resetFormState)
+  }
+
   #handleFormSubmit = (point) => {
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
@@ -98,7 +132,6 @@ export default class PointPresenter {
       point
     );
     document.removeEventListener('keydown', this.#escKeyDownHandler);
-    this.#replaceFormToCard();
   }
 
   #handleFormDelete = (point) => {
